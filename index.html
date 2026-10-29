@@ -601,5 +601,113 @@
         btnEn.addEventListener("click", function () { setLang("en"); });
       })();
     </script>
+<!-- ============================================================
+  EASTER EGG de EVIA 🥚
+  INSTALACIÓN: copia TODO este bloque y pégalo en tu index.html
+  justo antes del </body>, guarda y haz push. No toca nada más.
+  QUÉ HACE: 3 clics (o 3 toques) seguidos en el logo del header
+  → el logo baila, llueve comida 🍔 y sale un mensajito.
+  El mensaje sale en español o inglés según el idioma de la página
+  (usa el <html lang="..."> que ya maneja tu botón ES/EN).
+============================================================ -->
+<style>
+  @keyframes evia-food-fall {
+    0% { transform: translateY(-10vh) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(110vh) rotate(720deg); opacity: 0.85; }
+  }
+  .evia-food {
+    position: fixed;
+    top: -8vh;
+    z-index: 9999;
+    pointer-events: none;
+    animation: evia-food-fall 2.8s ease-in forwards;
+  }
+  @keyframes evia-wiggle {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(-8deg) scale(1.08); }
+    50% { transform: rotate(8deg) scale(1.08); }
+    75% { transform: rotate(-4deg) scale(1.04); }
+  }
+  .evia-wiggle { animation: evia-wiggle 0.6s ease-in-out; display: inline-block; }
+  #evia-easter-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 8vh;
+    transform: translateX(-50%) translateY(20px);
+    background: #111;
+    color: #fff;
+    padding: 0.9rem 1.4rem;
+    border-radius: 999px;
+    font-size: 1rem;
+    z-index: 10000;
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+    pointer-events: none;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.35);
+    max-width: 90vw;
+    text-align: center;
+    font-family: inherit;
+  }
+  #evia-easter-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+<script>
+(function () {
+  var CLICK_WINDOW_MS = 1500;  // los 3 clics deben caer dentro de este tiempo
+  var COOLDOWN_MS = 3000;      // pausa antes de poder dispararlo otra vez
+  var target = document.querySelector("header .wordmark");
+  if (!target) return;
+  var clicks = 0, timer = null, lastFire = 0;
+  var EMOJIS = ["🌮","🍔","🍕","🍗","🍩","🍦","🎉","🥑","🍓","✨","🥐","🍜"];
+
+  function isEnglish() {
+    return (document.documentElement.lang || "es").toLowerCase().indexOf("en") === 0;
+  }
+  function toast(text) {
+    var el = document.getElementById("evia-easter-toast");
+    if (!el) {
+      el = document.createElement("div");
+      el.id = "evia-easter-toast";
+      document.body.appendChild(el);
+    }
+    el.textContent = text;
+    el.classList.add("show");
+    setTimeout(function () { el.classList.remove("show"); }, 2800);
+  }
+  function rain() {
+    for (var i = 0; i < 26; i++) {
+      (function (i) {
+        var s = document.createElement("span");
+        s.className = "evia-food";
+        s.textContent = EMOJIS[i % EMOJIS.length];
+        s.style.left = (Math.random() * 100) + "vw";
+        s.style.fontSize = (1.4 + Math.random() * 1.8) + "rem";
+        s.style.animationDelay = (Math.random() * 0.9) + "s";
+        document.body.appendChild(s);
+        setTimeout(function () { s.remove(); }, 4500);
+      })(i);
+    }
+  }
+  function fire() {
+    var now = Date.now();
+    if (now - lastFire < COOLDOWN_MS) return;
+    lastFire = now;
+    target.classList.remove("evia-wiggle");
+    void target.offsetWidth;
+    target.classList.add("evia-wiggle");
+    rain();
+    toast(isEnglish()
+      ? "You found me! 🎉 I'm EVIA's easter egg — I'll take the next order 😉"
+      : "¡Me encontraste! 🎉 Soy el easter egg de EVIA — la próxima orden la tomo yo 😉");
+  }
+  target.addEventListener("click", function () {
+    clicks++;
+    if (timer) clearTimeout(timer);
+    if (clicks >= 3) { clicks = 0; fire(); return; }
+    timer = setTimeout(function () { clicks = 0; }, CLICK_WINDOW_MS);
+  });
+})();
+</script>
+<!-- ================= fin del easter egg ================= -->
+
   </body>
 </html>
